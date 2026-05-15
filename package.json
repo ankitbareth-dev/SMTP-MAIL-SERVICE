@@ -1,0 +1,14 @@
+{
+  "name": "smtp-mail-service",
+  "version": "1.0.0",
+  "description": "mail service",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ankit",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
