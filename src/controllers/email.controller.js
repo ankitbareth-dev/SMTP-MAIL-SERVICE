@@ -1,30 +1,44 @@
 import catchAsync from "../middlewares/catchAsync.js";
 import ApiError from "../utils/ApiError.js";
 
-import sendEmailService from "../services/email.service.js";
-import bookingTemplate from "../templates/booking.template.js";
+import { sendMail } from "../services/email.service.js";
 
-export const sendTestEmail = catchAsync(async (req, res) => {
-  const { to } = req.body;
+import adminInquiryTemplate from "../templates/adminInquiry.template.js";
+import customerConfirmationTemplate from "../templates/customerConfirmation.template.js";
 
-  if (!to) {
-    throw new ApiError(400, "Recipient email is required");
+export const sendInquiry = catchAsync(async (req, res) => {
+  const { name, email, phone, message } = req.body;
+
+  if (!name || !email || !phone || !message) {
+    throw new ApiError(400, "All fields are required");
   }
 
-  const html = bookingTemplate({
-    guestName: "John Doe",
-    hotelName: "Ocean View Villa",
+  // Send inquiry to admin
+
+  await sendMail({
+    to: process.env.ADMIN_EMAIL,
+    subject: `New Inquiry from: ${name}`,
+    replyTo: email,
+    html: adminInquiryTemplate({
+      name,
+      email,
+      phone,
+      message,
+    }),
   });
 
-  const info = await sendEmailService({
-    to,
-    subject: "Booking Confirmed",
-    html,
+  // Send confirmation to customer
+
+  await sendMail({
+    to: email,
+    subject: "We Received Your Inquiry",
+    html: customerConfirmationTemplate({
+      name,
+    }),
   });
 
   res.status(200).json({
     success: true,
-    message: "Email sent successfully",
-    messageId: info.messageId,
+    message: "Inquiry submitted successfully",
   });
 });
